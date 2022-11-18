@@ -1,6 +1,7 @@
 interface Room {
-    id: string,
-    users: string
+    id?: string,
+    users?: string,
+    room?: any
 }
 
 export default Room;

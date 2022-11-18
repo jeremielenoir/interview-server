@@ -1,12 +1,9 @@
-import * as moment from "moment";
-import {uuid} from "uuidv4";
-
 interface Message {
     text?: string,
     // @ts-ignore
-    date?: moment,
+    date?: string,
     // @ts-ignore
-    id?: uuid
+    id?: string
 }
 
 export default Message;
