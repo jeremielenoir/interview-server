@@ -31,7 +31,7 @@ const httpServer: Server = createServer(
 
 const io: ServerSocket = new ServerSocket(httpServer, {})
 
-const rooms: any = []
+const rooms: Array<Room> = []
 const messages: Array<Message> = []
 
 io.on('connection', (socket: Socket) => {
@@ -131,6 +131,7 @@ httpServer.listen(config.PORT, () => {
 
 
 
+/*
 /*
 
 /*

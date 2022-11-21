@@ -1,6 +1,6 @@
 interface Room {
-    id?: string,
-    users?: string,
+    id?: any,
+    users?: any,
     room?: any
 }
 
