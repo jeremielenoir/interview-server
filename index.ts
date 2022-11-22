@@ -4,17 +4,19 @@ import { v4 as uuid} from 'uuid';
 import { Server, createServer } from 'http';
 import { Server as ServerSocket, Socket} from 'socket.io';
 
-import config from './config'
+import config from './config';
 
 import * as moment from 'moment';
 
 import Message from './interfaces/Message';
 import Data from './interfaces/Data';
-import User from './interfaces/User'
-import Room from './interfaces/Room'
+import User from './core/User';
+import Room from './interfaces/Room';
 
 const app: Express = express();
 
+
+console.log(app)
 
 //let id: string = uuid()
 
@@ -61,30 +63,32 @@ io.on('connection', (socket: Socket) => {
         io.emit('FromAPI', messages);
     });
 
-    socket.on('join room', (roomID: Room) => {
-        const newRoom = {
+    socket.on('join room', (roomID: string) => {
+  
+        const newRoom: Room = {
             id: roomID,
-            users: [socket.id],
+            users: [new User(socket.id)],
         };
 
-        const doesRoomExists = rooms.find((room: Room) => room.id === roomID);
-        if (doesRoomExists) {
-            const isUserConnected = doesRoomExists.users.find(
-                (user: string) => user === socket.id,
+        const existingRoom: Room | undefined = rooms.find((room: Room) => room.id === roomID);
+        if (existingRoom) {
+            const connectedUser: User | undefined = existingRoom.users.find(
+                (user: User) => user.id === socket.id
             );
 
-            if (!isUserConnected && doesRoomExists.users.length < 2) {
-                doesRoomExists.users.push(socket.id);
+            if (!connectedUser && existingRoom.users.length < 2) {
+                const user: User = new User(socket.id)
+                existingRoom.users.push(user);
                 console.log(`User ${socket.id} joined room ${roomID}`);
             }
 
-            if (!isUserConnected && doesRoomExists.users.length >= 2) {
-                doesRoomExists.users.shift();
-                doesRoomExists.users.push(socket.id);
+            if (!connectedUser && existingRoom.users.length >= 2) {
+                existingRoom.users.shift();
+                existingRoom.users.push(socket.id);
                 console.log(`User ${socket.id} joined room ${roomID}`);
             }
 
-            const otherUser = doesRoomExists.users.find((user: User) => user !== socket.id);
+            const otherUser: User | undefined = existingRoom.users.find((user: User) => user.id !== socket.id);
             if (otherUser) {
                 socket.emit('other user', otherUser);
                 console.log('Room partner: ', otherUser);
@@ -100,17 +104,16 @@ io.on('connection', (socket: Socket) => {
     socket.on('leave-call', (data: Data) => {
         console.log(rooms);
         // socket.broadcast.emit('CallEnded');
-        const roomToLeave = rooms.find((room: Room) => room.id === data.room);
+        const roomToLeave: Room | undefined = rooms.find((room: Room) => room.id === data.room.id);
         if (roomToLeave) {
-            const leavingUser = roomToLeave.users.find(
-                (user: User) => user === data.userID,
+            const leavingUser: User | undefined = roomToLeave.users.find(
+                (user: User) => user.id === data.userID,
             );
             roomToLeave.users.splice(roomToLeave.users.indexOf(leavingUser), 1);
             console.log(`User ${data.userID} left room ${data.room}`);
 
-            let otherUser = roomToLeave.users.find((user: User) => user !== socket.id);
+            const otherUser: User | undefined = roomToLeave.users.find((user: User) => user.id !== socket.id);
             if (otherUser) {
-                otherUser = '';
                 socket.emit('other user', otherUser);
                 console.log('Room partner: ', otherUser);
             }

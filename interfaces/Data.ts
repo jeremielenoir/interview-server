@@ -1,11 +1,13 @@
+import Room from './Room'
+
 interface Data {
-    userToCall?: any,
+    userToCall: string,
     signalData?: any,
-    from?: any,
+    from?: string,
     to?: any,
     signal?: any,
-    userID: any,
-    room: any
+    userID: string,
+    room: Room
 }
 
 export default Data;
