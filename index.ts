@@ -113,7 +113,7 @@ io.on('connection', (socket: Socket) => {
             console.log(`User ${data.userID} left room ${data.room}`);
 
             const otherUser: User | undefined = roomToLeave.users.find((user: User) => user.id !== socket.id);
-            if (otherUser) {
+            if (otherUser) {,,
                 socket.emit('other user', otherUser);
                 console.log('Room partner: ', otherUser);
             }
