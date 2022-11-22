@@ -1,25 +1,22 @@
-import express, { Express, Request, Response } from 'express';
+import * as express from 'express';
+import {Express} from 'express';
 import { v4 as uuid} from 'uuid';
-import { Server, createServer, IncomingMessage, ServerResponse } from 'http';
+import { Server, createServer } from 'http';
 import { Server as ServerSocket, Socket} from 'socket.io';
-import dayjs from 'dayjs';
+
 import config from './config'
+
+import * as moment from 'moment';
 
 import Message from './interfaces/Message';
 import Data from './interfaces/Data';
 import User from './interfaces/User'
 import Room from './interfaces/Room'
 
-
 const app: Express = express();
 
 
-let id: string = uuid()
-
-// const path = require('path');
-// const fs = require('fs');
-
-
+//let id: string = uuid()
 
 const httpServer: Server = createServer(
     // {
@@ -53,9 +50,10 @@ io.on('connection', (socket: Socket) => {
         if (messages.length === 30) {
             messages.shift();
         }
+
         const newMessage = {
             text: message,
-            date: dayjs().format('HH:mm'),
+            date: moment().format('HH:mm'),
             id: uuid(),
         };
         messages.push(newMessage);
@@ -102,15 +100,15 @@ io.on('connection', (socket: Socket) => {
     socket.on('leave-call', (data: Data) => {
         console.log(rooms);
         // socket.broadcast.emit('CallEnded');
-        const roomToLeave = rooms.find((room: any) => room.id === data.room);
+        const roomToLeave = rooms.find((room: Room) => room.id === data.room);
         if (roomToLeave) {
             const leavingUser = roomToLeave.users.find(
-                (user: any) => user === data.userID,
+                (user: User) => user === data.userID,
             );
             roomToLeave.users.splice(roomToLeave.users.indexOf(leavingUser), 1);
             console.log(`User ${data.userID} left room ${data.room}`);
 
-            let otherUser = roomToLeave.users.find((user: any) => user !== socket.id);
+            let otherUser = roomToLeave.users.find((user: User) => user !== socket.id);
             if (otherUser) {
                 otherUser = '';
                 socket.emit('other user', otherUser);
